@@ -8,7 +8,7 @@
 	<!-- <meta http-equiv="refresh" content="30" /> -->
 
 	<!-- 这里好像显示不了svg图作为标题图标 -->
-	<!-- <link rel="shortcut icon" href="F:\华清物业\Grails\img\grails-icon.png"> -->
+	<!-- <link rel="shortcut icon" href="\Grails\img\grails-icon.png"> -->
 	<title>九型人格简易测试</title>
 
 	<!-- target="_blank"意思是让链接在新标签页内打开 -->
@@ -31,10 +31,16 @@
 		}
 		.page-turning {
 			display: flex;
-			justify-content: space-evenly;
+			justify-content: space-around;
 		}
 		.page-choice {
 			color: blue;
+		}
+		.btn {
+			width: 60px;
+		}
+		.result {
+			display: none;
 		}
 		.footer {
 			height: 80px;
@@ -49,10 +55,8 @@
 	</script>
 	<script>
 		var data;
-		var index = 0;
+		var index = 107;
 		var choiceResults = new Array();
-		var highestTypeIndex = new Array();
-		highestTypeIndex.push(1);
 		
 		$(document).ready(function () {
 			$.ajax({
@@ -97,6 +101,9 @@
 		}
 		
 		function caculateResult(typeResult) {
+			var highestTypeIndex = new Array();
+			highestTypeIndex.push(1);
+		
 			for(var i = 0; i < typeResult.length; i++) {
 				if(typeResult[i] > typeResult[highestTypeIndex[0]]) {
 					highestTypeIndex = new Array();
@@ -106,18 +113,36 @@
 				}
 			}
 			
-			console.log(highestTypeIndex);			
+			console.log(highestTypeIndex);
+			
+			var resultType;
 			if(highestTypeIndex.length == 1) {
-				console.log('可能是第' + (highestTypeIndex[0] + 1) + '类人格');
+				resultType = highestTypeIndex[0] + 1;
 			} else if(highestTypeIndex.includes(0) && highestTypeIndex.includes(8)) {
-				console.log('可能是第1或第9类人格');
+				resultType = 19;
 			} else if(highestTypeIndex.includes(8)) {
-				console.log('可能是第9类人格');
+				resultType = 9;
 			} else if(highestTypeIndex.includes(0)) {
-				console.log('可能是第1类人格');
+				resultType = 1;
 			} else {
-				console.log('不知道啊');
+				resultType = -1;
 			}
+			
+			var description;
+			if(resultType == -1) {
+				description = '你的类型无法定义';
+				document.getElementById("search").href = 'https://www.baidu.com/s?wd=九型人格';
+			} else if(resultType == 19) {
+				description = '你可能属于第1类人格';
+				document.getElementById("search").href = 'https://www.baidu.com/s?wd=九型人格1号性格';
+				var resultParagraph = document.getElementById("result");
+				resultParagraph.innerHTML = resultParagraph.innerHTML + "<p>你也可能属于第9类人格，更多请<a id='search' target='_blank' href='https://www.baidu.com/s?wd=九型人格9号性格'>点击这里</a>查看。</p>";
+			} else {
+				description = '你可能属于九型人格中的第' + resultType + '类人格';
+				document.getElementById("search").href = 'https://www.baidu.com/s?wd=九型人格' + resultType + '号性格';
+			}
+			document.getElementById("description").innerHTML = description;
+			document.getElementById("result").style.display = 'block';
 		}
 		
 		function notifyTopicChanged(needChecked) {
@@ -170,9 +195,12 @@
 	<hr />
 	<p>
 		<div class="page-turning">
-			<button id="lastBtn" type="button" onclick="onLastClick()">上一题</button>
-			<button id="nextBtn" type="button" onclick="onNextClick()">下一题</button>
+			<button id="lastBtn" class="btn" type="button" onclick="onLastClick()">上一题</button>
+			<button id="nextBtn" class="btn" type="button" onclick="onNextClick()">下一题</button>
 		</div>
+	</p>
+	<p id="result" class="result">
+		<label id="description">第X类人格</label>，更多请<a id="search" href="https://www.baidu.com/" target="_blank">点击这里</a>查看。
 	</p>
 	<div class="footer">
 		<hr />
