@@ -51,13 +51,17 @@
 		}
 	</style>
 
-	<script src="jquery-3.4.1.js">
+	<!-- <script src="jquery-3.4.1.js">
+	</script> -->
+	<script src="topics.js">
 	</script>
 	<script>
-		var data;
-		var index = 107;
+		var index = 0;
 		var choiceResults = new Array();
 		
+		/*
+		// 使用jquery读取json文件的方式。会存在跨域问题，虽然可以使用为快捷方式的目标添加“ --allow-file-access-from-files”解决，但对于用户来说不友好。
+		var data;
 		$(document).ready(function () {
 			$.ajax({
 				url: 'topics.json',
@@ -69,6 +73,9 @@
 				}
 			});
 		});
+		*/
+		// 引入js文件内的对象的方式。直接在这里写，在操作dom时会找不到元素，因此在body部分的末尾执行该方法。
+		// notifyTopicChanged(true);
 		
 		function onRadioChanged(value) {
 			choiceResults[index] = value;
@@ -146,6 +153,9 @@
 		}
 		
 		function notifyTopicChanged(needChecked) {
+			console.log(data);
+			console.log(index);
+			console.log((index + 1) + "." + data.topics[index].content);
 			document.getElementById("topic").innerHTML=(index + 1) + "." + data.topics[index].content;
 			if(choiceResults[index] == 1){
 				document.getElementById("yes").checked = true;
@@ -206,5 +216,8 @@
 		<hr />
 		<p>Power by Edymion Copyright © 2019-2099.</p>
 	</div>
+	<script>
+		notifyTopicChanged(true);
+	</script>
 </body>
 </html>
