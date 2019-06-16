@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8" />
+	<meta name="keywords" content="九型人格" />
+	<meta name="author" content="aq" />
+	<!-- 每n秒刷新当前页面 -->
+	<!-- <meta http-equiv="refresh" content="30" /> -->
+
+	<!-- 这里好像显示不了svg图作为标题图标 -->
+	<link rel="shortcut icon" href="F:\华清物业\Grails\img\grails-icon.png">
+	<title>九型人格简易测试</title>
+
+	<!-- target="_blank"意思是让链接在新标签页内打开 -->
+	<base href="F:\Files\web\九型人格简易测试\" />
+
+	<style type="text/css">
+		.topic {
+			margin: 0 0 10px 20px;
+			font-size: 20px;
+		}
+		.choice {
+			margin: 0 0 0 30px;
+			display: inline-block;
+			width: 100%;
+			font-size: 18px;
+		}
+		.choice-radio {
+			width: 20px;
+			margin: 10px 0 10px 0;
+		}
+		.page-turning {
+			display: flex;
+			justify-content: space-evenly;
+		}
+		.page-choice {
+			color: blue;
+		}
+		.footer {
+			height: 80px;
+			width: 100%;
+			position: fixed;
+			bottom: 0;
+			text-align: center;
+		}
+	</style>
+
+	<script src="jquery-3.4.1.js">
+	</script>
+	<script>
+		var data;
+		var index = 0;
+		var choiceResults = new Array();
+		var highestTypeIndex = new Array();
+		highestTypeIndex.push(1);
+		
+		$(document).ready(function () {
+			$.ajax({
+				url: 'topics.json',
+				async: false,
+				success: function (fileData) {
+					data = JSON.parse(fileData);
+					console.log(data);
+					notifyTopicChanged(true);
+				}
+			});
+		});
+		
+		function onRadioChanged(value) {
+			choiceResults[index] = value;
+		}
+		
+		function onLastClick(){
+			index--;
+			notifyTopicChanged(false);
+		}
+		
+		function onNextClick(){
+			if(index == data.topics.length - 1) {
+				showResult();
+			} else {
+				index++;
+				notifyTopicChanged(true);
+			}
+		}
+		
+		function showResult() {
+			console.log(choiceResults);
+			var typeResult = [0, 0, 0, 0, 0, 0, 0, 0, 0];
+			for(var i = 0; i < choiceResults.length; i++) {
+				if(choiceResults[i] == 1) {
+					typeResult[data.topics[i].type - 1]++;
+				}
+			}
+			console.log(typeResult);
+			caculateResult(typeResult);
+		}
+		
+		function caculateResult(typeResult) {
+			for(var i = 0; i < typeResult.length; i++) {
+				if(typeResult[i] > typeResult[highestTypeIndex[0]]) {
+					highestTypeIndex = new Array();
+					highestTypeIndex.push(i);
+				} else if(typeResult[i] == typeResult[highestTypeIndex[0]]) {
+					highestTypeIndex.push(i);
+				}
+			}
+			
+			console.log(highestTypeIndex);			
+			if(highestTypeIndex.length == 1) {
+				console.log('可能是第' + (highestTypeIndex[0] + 1) + '类人格');
+			} else if(highestTypeIndex.includes(0) && highestTypeIndex.includes(8)) {
+				console.log('可能是第1或第9类人格');
+			} else if(highestTypeIndex.includes(8)) {
+				console.log('可能是第9类人格');
+			} else if(highestTypeIndex.includes(0)) {
+				console.log('可能是第1类人格');
+			} else {
+				console.log('不知道啊');
+			}
+		}
+		
+		function notifyTopicChanged(needChecked) {
+			document.getElementById("topic").innerHTML=(index + 1) + "." + data.topics[index].content;
+			if(choiceResults[index] == 1){
+				document.getElementById("yes").checked = true;
+				document.getElementById("no").checked = false;
+			} else if(choiceResults[index] == 0) {
+				document.getElementById("yes").checked = false;
+				document.getElementById("no").checked = true;
+			} else {
+				document.getElementById("yes").checked = false;
+				document.getElementById("no").checked = false;
+			}
+			// 保持选项结果数组长度与当前阅读的题数相等
+			if(needChecked && (choiceResults.length < index + 1)) {
+				choiceResults.push(-1);
+			}
+			// 定义按钮的隐藏显示及显示文字
+			if(index == 0) {
+				document.getElementById("lastBtn").style.display = 'none';
+			} else if(index == 1) {
+				document.getElementById("lastBtn").style.display = 'block';
+			}
+			if(index == data.topics.length - 1) {
+				document.getElementById("nextBtn").innerHTML = '完成';
+			} else {
+				document.getElementById("nextBtn").innerHTML = '下一题';
+			}
+		}
+	</script>
+</head>
+
+<body>
+	<h1 id="name" style="text-align:center;">九型人格简易测试</h1>
+	<hr />
+	<p id="topic" class="topic">
+		1.你常常不知道自己想要什么，并为此十分痛苦。
+	</p>
+	<!-- 使用label嵌套radio并设置for-id属性，使得点击文字也能触发radio的选择事件 -->
+	<!-- label是行内元素，需要指定为inline-block，才能为其宽度赋值 -->
+	<label class="choice" for="yes">
+		<input id="yes" class="choice-radio" type="radio" name="sex" value="yes" onclick="onRadioChanged(1)" />
+		是
+	</label><br />
+	<label class="choice" for="no">
+		<input id="no" class="choice-radio" type="radio" name="sex" value="no" onclick="onRadioChanged(0)" />
+		不是
+	</label>
+	<hr />
+	<p>
+		<div class="page-turning">
+			<button id="lastBtn" type="button" onclick="onLastClick()">上一题</button>
+			<button id="nextBtn" type="button" onclick="onNextClick()">下一题</button>
+		</div>
+	</p>
+	<div class="footer">
+		<hr />
+		<p>Power by Edymion Copyright © 2019-2099.</p>
+	</div>
+</body>
+</html>
