@@ -79,6 +79,7 @@
 		
 		function onRadioChanged(value) {
 			choiceResults[index] = value;
+			document.getElementById("nextBtn").style.display = 'block';
 		}
 		
 		function onLastClick(){
@@ -181,6 +182,12 @@
 				document.getElementById("nextBtn").innerHTML = '完成';
 			} else {
 				document.getElementById("nextBtn").innerHTML = '下一题';
+			}
+			
+			if(choiceResults[index] == -1) {
+				document.getElementById("nextBtn").style.display = 'none';
+			} else {
+				document.getElementById("nextBtn").style.display = 'block';
 			}
 		}
 	</script>
